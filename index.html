@@ -197,7 +197,7 @@
             <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16">
                 <div class="w-full md:w-1/2">
                     <!-- Заміни src на реальне фото Влади. loading="lazy" для оптимізації -->
-                    <img src="photo_1.JPG" 
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop" 
                          alt="Влада Царенко" 
                          loading="lazy"
                          class="rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full object-cover aspect-[4/5] border border-stone-800">
@@ -370,7 +370,7 @@
             { type: 'comment', icon: '💬', texts: ['новий коментар', '"як записатись?"', '"де купити?"', '"підкажіть ціну"', '💬 +3 коментарі'] },
           ];
 
-          function createFloatItem() {
+          function createFloatItem(isInitial = false) {
             if(!container) return;
             const cat = items[Math.floor(Math.random() * items.length)];
             const text = cat.texts[Math.floor(Math.random() * cat.texts.length)];
@@ -384,20 +384,31 @@
 
             const duration = 18 + Math.random() * 14;
             el.style.animationDuration = duration + 's';
-            el.style.animationDelay = Math.random() * 2 + 's';
+            
+            let timeToLive = duration + 3;
+
+            if (isInitial) {
+                // Від'ємна затримка для стартових елементів (вони вже на екрані при завантаженні)
+                const negativeDelay = -(Math.random() * duration * 0.85);
+                el.style.animationDelay = negativeDelay + 's';
+                timeToLive = duration + negativeDelay + 3;
+            } else {
+                // Звичайна затримка для нових елементів, які летять знизу
+                el.style.animationDelay = Math.random() * 2 + 's';
+            }
 
             container.appendChild(el);
 
-            setTimeout(() => el.remove(), (duration + 3) * 1000);
+            setTimeout(() => el.remove(), timeToLive * 1000);
           }
 
-          // Initial burst
-          for (let i = 0; i < 6; i++) {
-            setTimeout(createFloatItem, i * 800);
+          // Initial burst: миттєво створюємо 15 елементів, які вже розподілені по екрану
+          for (let i = 0; i < 15; i++) {
+            createFloatItem(true);
           }
 
-          // Ongoing
-          setInterval(createFloatItem, 3000 + Math.random() * 2000);
+          // Ongoing: продовжуємо генерувати нові елементи під час перегляду
+          setInterval(() => createFloatItem(false), 2000 + Math.random() * 1500);
         })();
 
         // КОНФІГУРАЦІЯ (ВСТАВ СВІЙ ПОСИЛАННЯ НА GOOGLE SCRIPT ТУТ)
