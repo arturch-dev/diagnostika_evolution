@@ -370,7 +370,7 @@
             { type: 'comment', icon: '💬', texts: ['новий коментар', '"як записатись?"', '"де купити?"', '"підкажіть ціну"', '💬 +3 коментарі'] },
           ];
 
-          function createFloatItem(isInitial = false) {
+          function createFloatItem(isInitial = false, specificLeft = null) {
             if(!container) return;
             const cat = items[Math.floor(Math.random() * items.length)];
             const text = cat.texts[Math.floor(Math.random() * cat.texts.length)];
@@ -379,7 +379,8 @@
             el.className = `float-item ${cat.type}`;
             el.innerHTML = `<span class="float-icon">${cat.icon}</span>${text}`;
 
-            el.style.left = Math.random() * 85 + 5 + '%';
+            // Рівномірний розподіл для стартових, і рандомний для наступних
+            el.style.left = specificLeft !== null ? specificLeft + '%' : (Math.random() * 75 + 5) + '%';
             el.style.bottom = '-50px';
 
             const duration = 18 + Math.random() * 14;
@@ -388,12 +389,10 @@
             let timeToLive = duration + 3;
 
             if (isInitial) {
-                // Від'ємна затримка для стартових елементів (вони вже на екрані при завантаженні)
                 const negativeDelay = -(Math.random() * duration * 0.85);
                 el.style.animationDelay = negativeDelay + 's';
                 timeToLive = duration + negativeDelay + 3;
             } else {
-                // Звичайна затримка для нових елементів, які летять знизу
                 el.style.animationDelay = Math.random() * 2 + 's';
             }
 
@@ -402,13 +401,17 @@
             setTimeout(() => el.remove(), timeToLive * 1000);
           }
 
-          // Initial burst: миттєво створюємо 15 елементів, які вже розподілені по екрану
-          for (let i = 0; i < 15; i++) {
-            createFloatItem(true);
+          // Initial burst: 10 елементів (зменшили кількість), розкидані по колонках для рівномірності
+          const initialCount = 10;
+          for (let i = 0; i < initialCount; i++) {
+            const sliceWidth = 80 / initialCount;
+            // Кожен елемент отримує свою "колонку" (від 5% до 85% ширини екрану) + невеликий рандом всередині колонки
+            const leftPos = 5 + (i * sliceWidth) + (Math.random() * (sliceWidth * 0.6));
+            createFloatItem(true, leftPos);
           }
 
-          // Ongoing: продовжуємо генерувати нові елементи під час перегляду
-          setInterval(() => createFloatItem(false), 2000 + Math.random() * 1500);
+          // Ongoing: генеруємо нові трохи рідше (кожні 3-4.5 сек замість 2-3.5 сек)
+          setInterval(() => createFloatItem(false, null), 3000 + Math.random() * 1500);
         })();
 
         // КОНФІГУРАЦІЯ (ВСТАВ СВІЙ ПОСИЛАННЯ НА GOOGLE SCRIPT ТУТ)
